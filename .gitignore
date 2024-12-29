@@ -1,0 +1,32 @@
+# Ignore build output
+zig-out/
+
+# Ignore binary executables
+*.exe
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+
+# Ignore debug and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore user-specific configuration files
+.vscode/
+.idea/
+*.iml
+*.code-workspace
+
+# Ignore environment-specific files
+.env
+*.env.local
