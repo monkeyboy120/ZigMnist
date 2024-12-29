@@ -1,6 +1,5 @@
 const std = @import("std");
 
 pub fn main() !void {
-    const stdout = std.io.getStdOut().writer();
-    try stdout.print("MNIST Project in Zig\n", .{});
+    std.debug.print("Hello, World!\n", .{});
 }
