@@ -15,42 +15,43 @@ const Data = struct {
     }
 };
 
-pub fn readMnistData(allocator: *const std.mem.Allocator) !Data {
-    const trainImagesPath: []const u8 = "../data/train-lables-idx3-ubyte";
+pub fn readMnistData(allocator: *std.mem.Allocator) !Data {
+    const trainImagesPath: []const u8 = "/Users/joshuala/Projects/2024/mnistzig/data/train-images.idx3-ubyte";
+    const trainLabelsPath: []const u8 = "/Users/joshuala/Projects/2024/mnistzig/data/train-labels.idx1-ubyte";
+    const testImagesPath: []const u8 = "/Users/joshuala/Projects/2024/mnistzig/data/t10k-images.idx3-ubyte";
+    const testLabelsPath: []const u8 = "/Users/joshuala/Projects/2024/mnistzig/data/t10k-labels.idx1-ubyte";
+
     const trainImagesU8 = try readIdxFile(trainImagesPath, 16, allocator);
     defer allocator.free(trainImagesU8);
-    var trainImages = try allocator.alloc(f64, 784 * 60000);
+    var trainImages = try allocator.alloc(f64, trainImagesU8.len);
     var i: u32 = 0;
-    while (i < 784 * 60000) : (i += 1) {
+    while (i < trainImagesU8.len) : (i += 1) {
         const x: f64 = @floatFromInt(trainImagesU8[i]);
         trainImages[i] = x / 255;
     }
 
-    const trainLabelsPath: []const u8 = "../data/train-labels-idx1-ubyte";
     const trainLabels = try readIdxFile(trainLabelsPath, 8, allocator);
 
-    const testImagesPath: []const u8 = "..data/t10k-images-idx3-ubyte";
     const testImagesU8 = try readIdxFile(testImagesPath, 8, allocator);
     defer allocator.free(testImagesU8);
-    var testImages = try allocator.alloc(f64, 784 * 60000);
+    var testImages = try allocator.alloc(f64, testImagesU8.len);
     i = 0;
-    while (i < 784 * 60000) : (i += 1) {
-        const x: f64 = @floatFromInt(testImagesU8);
+    while (i < testImagesU8.len) : (i += 1) {
+        const x: f64 = @floatFromInt(testImagesU8[i]);
         testImages[i] = x / 255;
     }
 
-    const testLabelsPath: []const u8 = "../data/t10k-labels-idx1-ubyte";
     const testLabels = try readIdxFile(testLabelsPath, 8, allocator);
 
     return Data{
-        .testImages = testImagesU8,
+        .testImages = testImages,
         .testLabels = testLabels,
-        .trainImages = trainImagesU8,
+        .trainImages = trainImages,
         .trainLabels = trainLabels,
     };
 }
 
-pub fn readIdxFile(path: []const u8, skip_bytes: u8, allocator: *const std.mem.Allocator) ![]u8 {
+pub fn readIdxFile(path: []const u8, skip_bytes: u8, allocator: *std.mem.Allocator) ![]u8 {
     const file = try std.fs.cwd().openFile(path, .{});
     defer file.close();
 
