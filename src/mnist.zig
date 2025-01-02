@@ -15,7 +15,7 @@ const Data = struct {
     }
 };
 
-pub fn readMnistData(allocator: *std.mem.Allocator) !Data {
+pub fn readMnistData(allocator: *const std.mem.Allocator) !Data {
     const trainImagesPath: []const u8 = "../data/train-lables-idx3-ubyte";
     const trainImagesU8 = try readIdxFile(trainImagesPath, 16, allocator);
     defer allocator.free(trainImagesU8);
@@ -50,7 +50,7 @@ pub fn readMnistData(allocator: *std.mem.Allocator) !Data {
     };
 }
 
-pub fn readIdxFile(path: []const u8, skip_bytes: u8, allocator: *std.mem.Allocator) ![]u8 {
+pub fn readIdxFile(path: []const u8, skip_bytes: u8, allocator: *const std.mem.Allocator) ![]u8 {
     const file = try std.fs.cwd().openFile(path, .{});
     defer file.close();
 
