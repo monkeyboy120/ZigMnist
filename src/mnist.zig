@@ -16,6 +16,7 @@ const Data = struct {
 };
 
 pub fn readMnistData(allocator: *std.mem.Allocator) !Data {
+    // TODO: Fix absolute paths
     const trainImagesPath: []const u8 = "/Users/joshuala/Projects/2024/mnistzig/data/train-images.idx3-ubyte";
     const trainLabelsPath: []const u8 = "/Users/joshuala/Projects/2024/mnistzig/data/train-labels.idx1-ubyte";
     const testImagesPath: []const u8 = "/Users/joshuala/Projects/2024/mnistzig/data/t10k-images.idx3-ubyte";
