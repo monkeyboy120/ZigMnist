@@ -1,3 +1,4 @@
+//NOTE: Handles data input from Mnist dataset
 const std = @import("std");
 
 const Data = struct {
