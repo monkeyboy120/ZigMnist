@@ -1,7 +1,7 @@
 //NOTE: Implements Convolutional Layers
 
 const std = @import("std");
-const Tensor = @import("tensor").Tensor;
+const Tensor = @import("tensor.zig").Tensor;
 
 pub const ConvLayer = struct {
     filters: []Tensor, // Kernels
