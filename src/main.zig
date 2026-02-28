@@ -2,36 +2,30 @@
 //! you are building an executable. If you are making a library, the convention
 //! is to delete this file and start with root.zig instead.
 const std = @import("std");
+const data_loader = @import("utils/data_loader.zig");
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    // Pretend you've loaded MNIST files into these:
+    var ds = try loadMnistDataset(allocator, "train-images.idx3-ubyte", "train-labels.idx1-ubyte");
+    defer ds.deinit();
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    var prng = std.Random.DefaultPrng.init(12345);
+    var rng = prng.random();
 
-    try bw.flush(); // Don't forget to flush!
-}
+    var it = try BatchIter.init(allocator, &ds, 64, true, &rng);
+    defer it.deinit();
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // Try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
-}
+    while (it.next()) |batch| {
+        // batch.x shape: [batch.n, 1, 28, 28] packed in NCHW
+        // batch.y shape: [batch.n]
+        // feed to your CNN forward pass
+        // cnn.forward(batch.x, batch.n);
+    }
 
-test "fuzz example" {
-    const global = struct {
-        fn testOne(input: []const u8) anyerror!void {
-            // Try passing `--fuzz` to `zig build test` and see if it manages to fail this test case!
-            try std.testing.expect(!std.mem.eql(u8, "canyoufindme", input));
-        }
-    };
-    try std.testing.fuzz(global.testOne, .{});
+    // Next epoch:
+    try it.reset(true, &rng);
 }
