@@ -1,6 +1,7 @@
 const std = @import("std");
+const tensor = @import("utils/tensor.zig");
 
-const TensorError = error{ ShapeMismatch };
+const TensorError = error{ShapeMismatch};
 
 pub const ConvolutionalLayer = struct {
     allocator: std.mem.Allocator,
@@ -27,7 +28,7 @@ pub const ConvolutionalLayer = struct {
 
     // reusable output/gradient buffers (owned by layer)
     out_buf: []f32, // N * out_c * Hout * Wout
-    dx_buf: []f32,  // N * in_c * H * W
+    dx_buf: []f32, // N * in_c * H * W
 
     fn wIndex(self: *const ConvolutionalLayer, oc: usize, ic: usize, ky: usize, kx: usize) usize {
         // W[oc, ic, ky, kx] in (out_c, in_c, k_h, k_w)
@@ -80,7 +81,7 @@ pub const ConvolutionalLayer = struct {
 
         // init weights small random in [-scale, +scale], biases = 0
         for (w) |*val| {
-            const u = rng.float(f32);         // [0,1)
+            const u = rng.float(f32); // [0,1)
             const r = (2.0 * u - 1.0) * scale; // [-scale, +scale]
             val.* = r;
         }
@@ -127,7 +128,7 @@ pub const ConvolutionalLayer = struct {
         @memset(self.db, 0.0);
     }
 
-    pub fn forward(self: *ConvolutionalLayer, x: Tensor4) !Tensor4 {
+    pub fn forward(self: *ConvolutionalLayer, x: tensor.Tensor4) !tensor.Tensor4 {
         if (x.c != self.in_c) return TensorError.ShapeMismatch;
 
         // cache input for backward (copy)
@@ -149,7 +150,7 @@ pub const ConvolutionalLayer = struct {
             self.out_buf = try self.allocator.alloc(f32, out_len);
         }
 
-        var y = try Tensor4.init(self.out_buf, x.n, self.out_c, od.h, od.w);
+        var y = try tensor.Tensor4.init(self.out_buf, x.n, self.out_c, od.h, od.w);
 
         // compute convolution
         for (0..x.n) |n| {
@@ -194,7 +195,7 @@ pub const ConvolutionalLayer = struct {
         return y;
     }
 
-    pub fn backward(self: *ConvolutionalLayer, dout: Tensor4) !Tensor4 {
+    pub fn backward(self: *ConvolutionalLayer, dout: tensor.Tensor4) !tensor.Tensor4 {
         // Expect dout matches forward output shape
         const in_sh = self.cached_in_shape;
         if (in_sh.n == 0) return error.MissingForwardCache;
@@ -259,6 +260,6 @@ pub const ConvolutionalLayer = struct {
             }
         }
 
-        return Tensor4.init(self.dx_buf, in_sh.n, in_sh.c, in_sh.h, in_sh.w);
+        return tensor.Tensor4.init(self.dx_buf, in_sh.n, in_sh.c, in_sh.h, in_sh.w);
     }
 };
