@@ -1,5 +1,6 @@
 # Ignore build output
 zig-out/
+.zig-cache/
 
 # Ignore binary executables
 *.exe
